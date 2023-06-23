@@ -127,7 +127,7 @@ class DEC(object):
 
         dist = _pairwise_euclidean_distance(embeddings, cluster_centers)
         q = 1.0/(1.0+dist**2/self.alpha)**((self.alpha+1.0)/2.0)
-        q = (q/tf.reduce_sum(q, axis=1, keepdims=True))
+        q = (q/tf.reduce_sum(q, axis=1, keep_dims=True))
         return q
     
     def target_distribution(self, q):
