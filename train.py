@@ -115,5 +115,5 @@ if __name__=="__main__":
 
     train(batch_size=args['batch_size'],
           dataset="MNIST",
-          pretrained_ae_ckpt_path="./ae_ckpt/model.ckpt")
-#           pretrained_ae_ckpt_path=None)
+#          pretrained_ae_ckpt_path="./ae_ckpt/model.ckpt")
+           pretrained_ae_ckpt_path=None)
