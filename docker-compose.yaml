@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  flask:
+    build: .
+    volumes:
+      - ./app:/workspace/app
+    tty: true
+    ports:
+      - 5000:80
+    environment:
+      TZ: Asia/Tokyo
+    # depends_on:
+    #   - db-mysql
+  db-mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: musicpass
+      MYSQL_DATABASE: music-research
+      MYSQL_USER: tairyu
+      MYSQL_PASSWORD: musicpass
+      #TZ: ${TIMEZONE}
+    volumes:
+      - db-storage:/var/lib/mysql
+      - ./mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+    ports:
+      - 3306:3306
+    platform: linux/x86_64
+volumes:
+  db-storage:
