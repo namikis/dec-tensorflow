@@ -1,7 +1,7 @@
 import tensorflow as tf
 from sklearn.cluster import KMeans
 import numpy as np
-from sklearn.utils.linear_assignment_ import linear_assignment
+from scipy.optimize import linear_sum_assignment as linear_assignment
 
 class AssignableDense(object):
     def __init__(self, input_, units, activation=tf.nn.relu):
@@ -34,14 +34,51 @@ class StackedAutoEncoder(object):
             self.layerwise_autoencoders.append(sub_ae)          
 
 
+# class AutoEncoder(object):
+#     def __init__(self, encoder_dims, input_dim, encode_activation=True, decode_activation=True):
+#         self.input_ = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim])
+#         self.input_batch_size = tf.placeholder(tf.int32, shape=())
+#         self.keep_prob = tf.placeholder(tf.float32)
+        
+#         self.layers = []
+
+#         with tf.name_scope("encoder"):
+#             self.encoder = self._fully_layer(self.input_, encoder_dims, encode_activation)
+            
+#         with tf.name_scope("decoder"):
+#             decoder_dims = list(reversed(encoder_dims[:-1])) + [input_dim]
+#             self.decoder = self._fully_layer(self.encoder, decoder_dims, decode_activation)
+        
+#         with tf.name_scope("sae-train"):
+#             self.loss = tf.losses.mean_squared_error(self.input_, self.decoder)
+#             learning_rate = tf.train.exponential_decay(learning_rate=0.1, 
+#                                                        global_step=tf.train.get_or_create_global_step(),
+#                                                        decay_steps=20000,
+#                                                        decay_rate=0.1,
+#                                                        staircase=True)
+#             self.optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(self.loss)
+    
+#     def _fully_layer(self, x, dims, last_activation=False):
+#         layer = x
+#         for i, dim in enumerate(dims):
+#             layer = tf.nn.dropout(layer, keep_prob=self.keep_prob)
+#             if last_activation==False and i==len(dims)-1:
+#                 dense = AssignableDense(layer, units=dim, activation=None)
+#             else:
+#                 dense = AssignableDense(layer, units=dim, activation=tf.nn.relu)
+#             self.layers.append(dense)
+#             layer = dense.apply(layer)
+            
+#         return layer
+
 class AutoEncoder(object):
     def __init__(self, encoder_dims, input_dim, encode_activation=True, decode_activation=True):
-        self.input_ = tf.placeholder(tf.float32, shape=[None, input_dim])
-        self.input_batch_size = tf.placeholder(tf.int32, shape=())
-        self.keep_prob = tf.placeholder(tf.float32)
+        self.input_ = tf.keras.Input(shape=(input_dim,))
+        self.input_batch_size = tf.Variable(0, dtype=tf.int32)
+        self.keep_prob = tf.Variable(0.0, dtype=tf.float32)
         
         self.layers = []
-
+        
         with tf.name_scope("encoder"):
             self.encoder = self._fully_layer(self.input_, encoder_dims, encode_activation)
             
@@ -51,23 +88,25 @@ class AutoEncoder(object):
         
         with tf.name_scope("sae-train"):
             self.loss = tf.losses.mean_squared_error(self.input_, self.decoder)
-            learning_rate = tf.train.exponential_decay(learning_rate=0.1, 
-                                                       global_step=tf.train.get_or_create_global_step(),
-                                                       decay_steps=20000,
-                                                       decay_rate=0.1,
-                                                       staircase=True)
-            self.optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(self.loss)
+            learning_rate = tf.keras.optimizers.schedules.ExponentialDecay(
+                initial_learning_rate=0.1,
+                decay_steps=20000,
+                decay_rate=0.1,
+                staircase=True
+            )
+            optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate, momentum=0.9)
+            self.optimizer = optimizer.minimize(self.loss)
     
     def _fully_layer(self, x, dims, last_activation=False):
         layer = x
         for i, dim in enumerate(dims):
-            layer = tf.nn.dropout(layer, keep_prob=self.keep_prob)
-            if last_activation==False and i==len(dims)-1:
-                dense = AssignableDense(layer, units=dim, activation=None)
+            layer = tf.keras.layers.Dropout(self.keep_prob)(layer)
+            if last_activation == False and i == len(dims) - 1:
+                dense = tf.keras.layers.Dense(units=dim, activation=None)
             else:
-                dense = AssignableDense(layer, units=dim, activation=tf.nn.relu)
+                dense = tf.keras.layers.Dense(units=dim, activation=tf.nn.relu)
             self.layers.append(dense)
-            layer = dense.apply(layer)
+            layer = dense(layer)
             
         return layer
 
