@@ -3,6 +3,7 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 80
 WORKDIR /workspace
 ADD ./requirements.txt /workspace
+ADD ./server.py /workspace
 
 RUN mkdir /workspace/app
 

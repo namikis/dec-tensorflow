@@ -110,6 +110,12 @@ if __name__=="__main__":
     parser.add("--gpu-index", dest="gpu_index", help="GPU Index Number", default="0", type=str)
 
     args = vars(parser.parse_args())
+
+    device_name = tf.test.gpu_device_name()
+    if device_name == '/device:GPU:0':
+        print('Found GPU at: {}'.format(device_name))
+    else:
+        print("not found GPU.")
     
     os.environ['CUDA_VISIBLE_DEVICES'] = args['gpu_index']
 
