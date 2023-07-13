@@ -51,7 +51,7 @@ class AutoEncoder(object):
         
         with tf.name_scope("sae-train"):
             self.loss = tf.losses.mean_squared_error(self.input_, self.decoder)
-            learning_rate = tf.train.exponential_decay(learning_rate=0.1, 
+            learning_rate = tf.train.exponential_decay(learning_rate=0.01, 
                                                        global_step=tf.train.get_or_create_global_step(),
                                                        decay_steps=20000,
                                                        decay_rate=0.1,
