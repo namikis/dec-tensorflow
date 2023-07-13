@@ -19,7 +19,7 @@ def export_z(z, filename, metadata=None, metafilename=None):
             
 def inference(dataset, \
               dec_ckpt_path, \
-              encoder_dims=[500, 500, 2000, 10], \
+              encoder_dims=[500, 500, 2000, 2], \
               plot_filename='cluster.png'):
 
     config = tf.ConfigProto()
@@ -27,6 +27,8 @@ def inference(dataset, \
     
     if dataset=='MNIST':
         data = MNIST()
+    elif dataset== 'Music4All':
+        data = Music4All()
     else:
         assert False, "Undefined dataset."
 
@@ -44,7 +46,7 @@ def inference(dataset, \
         saver.restore(sess, dec_ckpt_path)
         z=sess.run(model.ae.encoder, feed_dict={model.ae.input_: data.train_x, model.ae.keep_prob: 1.0})
         
-    export_z(z, 'z.tsv', data.train_y, 'meta.tsv')
+    export_z(z, 'z.tsv', None, None)
     return z
     
     
@@ -56,6 +58,6 @@ if __name__=="__main__":
     
     os.environ['CUDA_VISIBLE_DEVICES'] = args['gpu_index']
 
-    inference(dataset="MNIST",
-              dec_ckpt_path="./dec_ckpt/model.ckpt", \
+    inference(dataset="Music4All",
+              dec_ckpt_path="./dec_data/dec_ckpt/model.ckpt", \
               plot_filename='cluster.png')

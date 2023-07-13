@@ -7,7 +7,7 @@ import numpy as np
 
 def train(dataset, \
           batch_size=256, \
-          encoder_dims=[500, 500, 2000, 10], \
+          encoder_dims=[500, 500, 2000, 2], \
           initialize_iteration=50000, \
           finetune_iteration=100000, \
           pretrained_ae_ckpt_path=None):
@@ -17,6 +17,8 @@ def train(dataset, \
     
     if dataset=='MNIST':
         data = MNIST()
+    elif dataset == 'Music4All':
+        data = Music4All()
     else:
         assert False, "Undefined dataset."
 
@@ -120,6 +122,6 @@ if __name__=="__main__":
     os.environ['CUDA_VISIBLE_DEVICES'] = args['gpu_index']
 
     train(batch_size=args['batch_size'],
-          dataset="MNIST",
+          dataset="Music4All",
 #          pretrained_ae_ckpt_path="./ae_ckpt/model.ckpt")
            pretrained_ae_ckpt_path=None)

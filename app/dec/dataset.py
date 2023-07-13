@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import random
 import math
+import csv
     
 class Dataset():
     def __init__(self, train_x=None, train_y=None, test_x=None, test_y=None):
@@ -32,7 +33,7 @@ class Dataset():
         while iter_ <= until:
             idxs = random.sample(index_list, batch_size)
             iter_ += 1
-            yield (x[idxs], y[idxs], idxs)
+            yield (x[idxs], 0, idxs)
         
     
 class MNIST(Dataset):
@@ -45,3 +46,17 @@ class MNIST(Dataset):
         self.test_x = self.test_x*0.02
         self.num_classes = 10
         self.feature_dim = 784
+
+class Music4All(Dataset):
+  def __init__(self):
+    super().__init__()
+    music_row_data = []
+    with open('./music4all.csv') as f:
+        reader = csv.reader(f)
+        for idx, row in enumerate(reader):
+          if idx > 0:
+            row = np.array(list(map(float, row)))
+          music_row_data.append(row)
+    self.train_x = np.array(music_row_data[1:])
+    self.num_classes = 10
+    self.feature_dim = 4
